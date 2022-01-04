@@ -11,4 +11,28 @@
 4.  MATCH (airport:Airport)<-[origin:ORIGIN]-(flight:Flight)
     RETURN airport, COUNT(origin) AS flightCount
     ORDER BY flightCount
-5.  
+5.  MATCH flights = (start:Airport { name:'LAX' })<-[:ORIGIN]-()-[*]->(end:Airport) 
+    WHERE REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket) | ticket.price][0]) < 3000 
+    RETURN flights
+    //    MATCH flights = (start:Airport { name:'LAX' })<-[:ORIGIN]-()-[:DESTINATION]->(mid:Airport)<-[:ORIGIN]-()-[:DESTINATION]->(end:Airport)
+    //      WHERE REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket) | ticket.price][0]) < 3000 
+    //      RETURN flights
+6.  MATCH flights = (start:Airport { name:'LAX' })<-[:ORIGIN]-()-[:DESTINATION]->(end:Airport {name: 'DAY'}) 
+    WITH flights, REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket) | ticket.price][0]) AS price
+    RETURN flights, price
+    ORDER BY price
+7.  MATCH flights = (start:Airport { name:'LAX' })<-[:ORIGIN]-()-[:DESTINATION]->(end:Airport {name: 'DAY'}) 
+    WITH flights, REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket) | ticket.price][0]) AS price
+    RETURN flights, price
+    ORDER BY price LIMIT 1
+8.  MATCH flights = (start:Airport { name:'LAX' })<-[:ORIGIN]-()-[:DESTINATION]->(end:Airport {name: 'DAY'}) 
+    WITH flights, REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket {class: 'business'}) | ticket.price][0]) AS price
+    RETURN flights, price
+    ORDER BY price LIMIT 1
+9.  
+10. MATCH flights = (start:Airport)<-[:ORIGIN]-()-[:DESTINATION]->(mid:Airport)<-[:ORIGIN]-()-[:DESTINATION]->(end:Airport)
+    WHERE NOT(start=mid) AND NOT(start=end) AND NOT(mid=end)
+    WITH flights, REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket {class: 'business'}) | ticket.price][0]) AS price
+    RETURN flights, price
+    ORDER BY price LIMIT 1
+
