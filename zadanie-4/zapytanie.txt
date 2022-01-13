@@ -27,7 +27,10 @@
     WITH flights, REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket {class: 'business'}) | ticket.price][0]) AS price
     RETURN flights, price
     ORDER BY price LIMIT 1
-9.  
+9.  MATCH (start:Airport)<-[:ORIGIN]-(flight:Flight) MATCH (end:Airport)<-[:DESTINATION]-(flight:Flight)
+    UNWIND [start, end] AS airp 
+    RETURN flight.airline, COUNT(DISTINCT airp.name) as airport_count
+    ORDER BY airport_count DESC
 10. MATCH flights = (start:Airport)<-[:ORIGIN]-()-[:DESTINATION]->(mid:Airport)<-[:ORIGIN]-()-[:DESTINATION]->(end:Airport)
     WHERE NOT(start=mid) AND NOT(start=end) AND NOT(mid=end)
     WITH flights, REDUCE(price = 0, x IN [flight IN NODES(flights) WHERE 'Flight' IN LABELS(flight)] | price + [(x)<-[:ASSIGN]-(ticket {class: 'business'}) | ticket.price][0]) AS price
